@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .shopListTitle li {
+            list-style-type: none;
+            text-align: center;
+            display: inline;
+        }
+
+        .shop,
+        .title {
+            position: relative;
+            transform: translateX(-50%);
+            left: 50%;
+            width: 80vw;
+        }
+
+        .shop>ul,
+        .title>ul {
+            display: flex;
+        }
+
+        .shop>ul>li,
+        .title>ul>li {
+            flex: 1 0 0;
+        }
+
+        .addBtn {
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .addBtn:hover {
+            color: blue;
+            background-color: aqua;
+        }
+
+        .cartNum {
+            display: flex;
+            justify-content: center;
+        }
+
+        .cartNum div:first-child,
+        .cartNum div:last-child {
+            padding: 0px 6px;
+            font-weight: 600;
+            color: chocolate;
+            flex: 0 0 0;
+            cursor: pointer;
+        }
+
+        .cutNum:hover,
+        .addNum:hover {
+            background-color: blueviolet;
+            color: aqua;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="shopListTitle">
+            <h1>SHOP</h1>
+            <div class="title">
+                <ul>
+                    <li>商品ID</li>
+                    <li>商品名称</li>
+                    <li>商品价格</li>
+                    <li>加入购物车</li>
+                </ul>
+            </div>
+            <div v-for="(shop,index) in shopList" :key="shop.id" class="shop">
+                <ul>
+                    <li>{{ shop.id }}</li>
+                    <li>{{ shop.name }}</li>
+                    <li>{{ shop.cost }}</li>
+                    <li>
+                        <div class="addBtn" @click="addShop(index,shop.id)">+</div>
+                    </li>
+                </ul>
+            </div>
+            <h1>购物车</h1>
+            <div class="title">
+                <ul>
+                    <li>商品名称</li>
+                    <li>商品价格</li>
+                    <li>商品数量</li>
+                </ul>
+            </div>
+            <div v-if="userCart">
+                <div v-for="(cart,index) in userCart" :key="index" class="shop">
+                    <ul>
+                        <li>{{ cart.name }}</li>
+                        <li>{{ cart.cost }}</li>
+                        <li>
+                            <div class="cartNum">
+                                <div @click="cutNum(index)" class="cutNum">-</div>
+                                <div class="numDiv">{{ cart.num }}</div>
+                                <div @click="addNum(index)" class="addNum">+</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <h4>总费用：￥{{ cost }}</h4>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script>
+
+    var app = new Vue({
+        el: "#app",
+        data() {
+            return {
+                shopList: [
+                    {
+                        id: 10001,
+                        name: "苹果",
+                        cost: 5
+                    },
+                    {
+                        id: 10002,
+                        name: "香蕉",
+                        cost: 3
+                    },
+                    {
+                        id: 10003,
+                        name: "桃子",
+                        cost: 4
+                    }
+                ],
+                userCart: []
+            }
+        },
+        methods: {
+            addShop: function (index, id) {
+                var userCart = this.userCart;
+                var shopList = this.shopList;
+                console.log(id);
+                if (userCart.length == 0) {
+                    // 购物车为空
+                    userCart.push({
+                        id: shopList[index].id,
+                        name: shopList[index].name,
+                        cost: shopList[index].cost,
+                        num: 1
+                    });
+                } else {
+                    // 购物车存在物品时，判断现在加入的物品是否存在
+                    var hasNoCart = true;
+                    for (var v = 0; v < userCart.length; v++) {
+                        if (userCart[v].id == id) {
+                            console.log("已经存在");
+                            //防止后面重复添加新的数据
+                            hasNoCart = false;
+                            //添加商品数量
+                            this.addNum(v);
+                            break;
+                        }
+                    }
+                    if (hasNoCart) {
+                        console.log("新商品不存在，继续push");
+                        userCart.push({
+                            id: shopList[index].id,
+                            name: shopList[index].name,
+                            cost: shopList[index].cost,
+                            num: 1
+                        });
+                    }
+                }
+            },
+            cutNum: function (index) {
+                var userCart = this.userCart;
+                if (userCart[index].num == 1) {
+                    // 如果数量为1时点击减少键，则删除该商品
+                    userCart.splice(index, 1);
+                } else {
+                    userCart[index].num--;
+                }
+            },
+            addNum: function (index) {
+                var userCart = this.userCart;
+                if (userCart[index].num < 10) {
+                    //设置商品最多选择10个
+                    userCart[index].num++;
+                } else {
+                    // userCart[index].num--;
+                    alert("商品最多选择10个！");
+                }
+            }
+        },
+        computed: {
+            cost: function () {
+                // 计算商品总价
+                var cost = 0;
+                for (let v = 0; v < this.userCart.length; v++) {
+                    cost += this.userCart[v].num * this.userCart[v].cost;
+                }
+                return cost;
+            }
+        }
+    })
+
+</script>
+
+</html>
